@@ -2,12 +2,13 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [ develop, main, staging ]
   pull_request:
-    branches: [ develop, main ]
+    branches: [ develop, main, staging ]
 
 jobs:
   analyze:
+    name: Code Analysis
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -38,6 +39,7 @@ jobs:
         run: flutter analyze --fatal-infos
 
   test:
+    name: Run Test
     needs: analyze
     runs-on: ubuntu-latest
     steps:
@@ -73,48 +75,9 @@ jobs:
         with:
           file: coverage/lcov.info
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.pub-cache
-            **/.dart_tool
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build APK (Dev)
-        if: github.ref == 'refs/heads/develop'
-        run: flutter build apk --dart-define=BUILD_ENV=dev --dart-define=API_URL=https://api-dev.example.com
-
-      - name: Build APK (Prod)
-        if: github.ref == 'refs/heads/main'
-        run: flutter build apk --dart-define=BUILD_ENV=prod --dart-define=API_URL=https://api.example.com
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk-${{ github.ref_name }}
-          path: build/app/outputs/flutter-apk/app-release.apk
-
   version_bump:
-    needs: build
+    name: Build Summary
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:

@@ -1,13 +1,13 @@
-name: Build Prod APK
+name: Build Staging APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ staging ]
   workflow_dispatch:
 
 jobs:
-  build-prod:
-    name: Build APK (Prod)
+  build-staging:
+    name: Build APK (Staging)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -31,11 +31,11 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK Prod Flavor
-        run: flutter build apk --flavor prod --target lib/main_prod.dart --dart-define=BUILD_ENV=prod --dart-define=API_URL=https://api.example.com
+      - name: Build APK Staging Flavor
+        run: flutter build apk --flavor staging --target lib/main_staging.dart --dart-define=BUILD_ENV=staging --dart-define=API_URL=https://api-staging.example.com
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: apk-prod-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-prod-release.apk
+          name: apk-staging-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-staging-release.apk
