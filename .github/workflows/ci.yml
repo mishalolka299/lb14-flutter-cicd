@@ -115,7 +115,6 @@ jobs:
     name: Build APK (Staging)
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -151,7 +150,6 @@ jobs:
     name: Build APK (Prod)
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
