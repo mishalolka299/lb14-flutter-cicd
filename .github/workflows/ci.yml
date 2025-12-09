@@ -75,9 +75,117 @@ jobs:
         with:
           file: coverage/lcov.info
 
+  build-dev:
+    name: Build APK (Dev)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            **/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK Dev Flavor
+        run: flutter build apk --flavor dev --target lib/main_dev.dart --dart-define=BUILD_ENV=dev --dart-define=API_URL=https://api-dev.example.com
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-dev-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
+
+  build-staging:
+    name: Build APK (Staging)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            **/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK Staging Flavor
+        run: flutter build apk --flavor staging --target lib/main_staging.dart --dart-define=BUILD_ENV=staging --dart-define=API_URL=https://api-staging.example.com
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-staging-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-staging-release.apk
+
+  build-prod:
+    name: Build APK (Prod)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            **/.dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK Prod Flavor
+        run: flutter build apk --flavor prod --target lib/main_prod.dart --dart-define=BUILD_ENV=prod --dart-define=API_URL=https://api.example.com
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-prod-${{ github.run_number }}
+          path: build/app/outputs/flutter-apk/app-prod-release.apk
+
   version_bump:
     name: Build Summary
-    needs: test
+    needs: [test, build-dev, build-staging, build-prod]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
