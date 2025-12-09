@@ -2,9 +2,9 @@ name: Flutter ci cd Pipelines
 
 on:
   push:
-    branches: [ develop, main, staging ]
+    branches: [ develop, master, staging ]
   pull_request:
-    branches: [ develop, main, staging ]
+    branches: [ develop, master, staging ]
 
 permissions:
   contents: write
