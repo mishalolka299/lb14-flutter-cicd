@@ -185,7 +185,6 @@ jobs:
     name: Build Summary
     needs: [test, build-dev, build-staging, build-prod]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
