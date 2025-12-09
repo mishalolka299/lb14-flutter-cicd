@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ develop, main, staging ]
 
+permissions:
+  contents: write
+
 jobs:
   analyze:
     name: Code Analysis
